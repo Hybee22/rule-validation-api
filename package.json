@@ -1,0 +1,31 @@
+{
+  "name": "rule-validation-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hybee22/rule-validation-api.git"
+  },
+  "keywords": [],
+  "author": "Ibrahim Adekunle",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hybee22/rule-validation-api/issues"
+  },
+  "homepage": "https://github.com/Hybee22/rule-validation-api#readme",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
+  },
+  "engines": {
+    "node": "14.7.0"
+  }
+}
