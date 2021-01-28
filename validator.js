@@ -23,7 +23,6 @@ const conditionCheck = (data, rule) => {
     }
 
     if (rule.condition === 'neq') {
-        console.log('B', typeof data, typeof rule.condition_value)
         return data !== rule.condition_value ? true : false;
     }
 
@@ -114,11 +113,9 @@ const validateRuleConditions = (payload) => {
         const dataToCheck = data[wordBeforeStop][wordAfterStop]
 
         return conditionCheck(dataToCheck, rule)
-        // return true
     }
 
     const dataToCheck = data[rule.field]
-    console.log('A',conditionCheck(dataToCheck, rule))
 
     return conditionCheck(dataToCheck, rule)
     
@@ -196,7 +193,6 @@ const isValidRule = (res, payload) => {
 const validateJSON = (req, res, payload) => {
     // Check conditions against Rule and Return response
     const { rule, data } = payload
-    console.log('Validate Rule Conditions', validateRuleConditions(payload))
     if (isValidRule(res, payload) && validateRuleConditions(payload)) {
         return res.status(200).json(
             {
