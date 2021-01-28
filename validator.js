@@ -9,7 +9,8 @@ const isValidJSONString = (str) => {
 }
 
 // Return Condition Check
-const conditionCheck = (data, rule) => {
+const conditionCheck = (data, payload) => {
+    const { rule, data: dataArr } = payload
     if (rule.condition === 'gte') {
         return data >= rule.condition_value ? true : false;
     }
@@ -28,7 +29,7 @@ const conditionCheck = (data, rule) => {
 
     if (rule.condition === 'contains') {
         const tempArray = []    
-        tempArray.push(data)
+        tempArray.push(...dataArr)
         return tempArray.includes(rule.condition_value) ? true : false;
     }
 }
@@ -58,14 +59,31 @@ const getFieldNestingLevel = (obj) => {
 // Check match between rule object field and data passed
 const checkRuleDataMatch = (res, payload) => {
     const { rule: { field }, rule, data } = payload
-    let dataArr = Object.keys(payload.data)
+    let dataArr;
+
+    if (Array.isArray(data)) {
+        dataArr = data
+        dataArr.forEach(val => { 
+            if (!dataArr.includes(rule.field)) {
+                return res.status(400).json({
+                    "message": `field ${rule.field} is missing from data.`,
+                    "status": "error",
+                    "data": null
+                })
+            }
+        })
+        return true
+    }
+
+    dataArr = Object.keys(payload.data)
+    
     const fieldToArr = field.split('')
 
     if (fieldToArr.includes('.')) {
         // get word before and after fullstop
         const stopIndex = fieldToArr.indexOf('.')
         const wordBeforeStop = fieldToArr.slice(0, stopIndex).join('')
-        const wordAfterStop = fieldToArr.slice(stopIndex + 1).join('')
+        // const wordAfterStop = fieldToArr.slice(stopIndex + 1).join('')
 
         // Check if data contains nested field
         if (data[wordBeforeStop]) {
@@ -82,6 +100,7 @@ const checkRuleDataMatch = (res, payload) => {
         }
         return true
     }
+
     dataArr.forEach(val => { 
         if (!dataArr.includes(rule.field)) {
             return res.status(400).json({
@@ -112,12 +131,12 @@ const validateRuleConditions = (payload) => {
 
         const dataToCheck = data[wordBeforeStop][wordAfterStop]
 
-        return conditionCheck(dataToCheck, rule)
+        return conditionCheck(dataToCheck, payload)
     }
 
     const dataToCheck = data[rule.field]
 
-    return conditionCheck(dataToCheck, rule)
+    return conditionCheck(dataToCheck, payload)
     
 }
 
@@ -191,8 +210,10 @@ const isValidRule = (res, payload) => {
 
 // Validate Rule and Data Field
 const validateJSON = (req, res, payload) => {
+
     // Check conditions against Rule and Return response
     const { rule, data } = payload
+    
     if (isValidRule(res, payload) && validateRuleConditions(payload)) {
         return res.status(200).json(
             {
@@ -225,8 +246,53 @@ const validateJSON = (req, res, payload) => {
                 }
             })
     }
+    
+}
+const validateNestedJSON = (req, res, payload) => {
+    // Check conditions against Rule and Return response
+    const { rule, data } = payload
+    
+    const fieldToArr = rule.field.split('')
+    const stopIndex = fieldToArr.indexOf('.')
+    const wordBeforeStop = fieldToArr.slice(0, stopIndex).join('')
+    const wordAfterStop = fieldToArr.slice(stopIndex + 1).join('')
+
+    if (isValidRule(res, payload) && validateRuleConditions(payload)) {
+
+        return res.status(200).json(
+            {
+                "message": "field missions successfully validated.",
+                "status": "success",
+                "data": {
+                    "validation": {
+                    "error": false,
+                    "field": rule.field,
+                    "field_value": data[wordBeforeStop][wordAfterStop],
+                    "condition": rule.condition,
+                    "condition_value": rule.condition_value
+                    }
+                }
+            }
+        )
+    } else {
+         res.status(400).json(
+            {
+                "message": "field missions failed validation.",
+                "status": "error",
+                "data": {
+                    "validation": {
+                    "error": true,
+                    "field": rule.field,
+                    "field_value": data[wordBeforeStop][wordAfterStop],
+                    "condition": rule.condition,
+                    "condition_value": rule.condition_value
+                    }
+                }
+            })
+    }
 }
 
 module.exports = {
-    validateJSON
+    validateJSON,
+    validateNestedJSON
 }

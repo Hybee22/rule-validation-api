@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Validator
-const { validateJSON } = require('./validator')
+const { validateJSON, validateNestedJSON } = require('./validator')
 
 
 app.use(cors());
@@ -38,7 +38,15 @@ return res.status(200).json(
 //   Rule Validation Route
 app.post('/validate-rule', (req, res) => {
     const payload = req.body
-    validateJSON(req, res, payload)
+    const { rule } = payload
+    
+    const fieldToArr = rule.field.split('')
+
+    if (fieldToArr.includes('.')) {
+        return validateNestedJSON(req, res, payload)
+    }
+
+    return validateJSON(req, res, payload) 
 })
 
 module.exports = app;
