@@ -43,17 +43,13 @@ const isValidData = (data) => {
     }
 }
 
-const getFieldNestingLevel = (obj) => {
-    let depth = 0;
-    if (obj.field && typeof obj.field === 'object') {
-        obj.field.forEach((d) => {
-            let tmpDepth = getDepth(d)
-            if (tmpDepth > depth) {
-                depth = tmpDepth
-            }
-        })
-        return 1 + depth
-    }
+const charCount = (letter, str) => 
+{
+ let count = 0;
+ for (let position = 0; position < str.length; position++) {
+    if (str.charAt(position) == letter) count += 1
+}
+  return count;
 }
 
 // Check match between rule object field and data passed
@@ -177,14 +173,6 @@ const isValidRule = (res, payload) => {
             })
         }
 
-        // Check nesting depth level
-        if (getFieldNestingLevel(rule) > 2) {
-            return res.status(400).json({
-                "message": `field nesting level has exceeded limit of 2.`,
-                "status": "error",
-                "data": null
-            })
-        }
         // Checking condition values
         const conditions = ['eq', 'neq', 'gt', 'gte', 'contains']
         if (!conditions.includes(rule.condition)) {
@@ -251,6 +239,17 @@ const validateJSON = (req, res, payload) => {
 const validateNestedJSON = (req, res, payload) => {
     // Check conditions against Rule and Return response
     const { rule, data } = payload
+
+    const nestingDepth = charCount('.', rule.field)
+
+    // Check nesting depth level
+    if (nestingDepth > 1) {
+        return res.status(400).json({
+            "message": `field nesting level has exceeded limit of 2.`,
+            "status": "error",
+            "data": null
+        })
+    }
     
     const fieldToArr = rule.field.split('')
     const stopIndex = fieldToArr.indexOf('.')
