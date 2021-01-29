@@ -205,7 +205,7 @@ const validateJSON = (req, res, payload) => {
     if (isValidRule(res, payload) && validateRuleConditions(payload)) {
         return res.status(200).json(
             {
-                "message": "field missions successfully validated.",
+                "message": `field ${rule.field} successfully validated.`,
                 "status": "success",
                 "data": {
                     "validation": {
@@ -221,7 +221,7 @@ const validateJSON = (req, res, payload) => {
     } else {
         return res.status(400).json(
             {
-                "message": "field missions failed validation.",
+                "message": `field ${rule.field} failed validation.`,
                 "status": "error",
                 "data": {
                     "validation": {
@@ -260,7 +260,7 @@ const validateNestedJSON = (req, res, payload) => {
 
         return res.status(200).json(
             {
-                "message": "field missions successfully validated.",
+                "message": `field ${rule.field} successfully validated.`,
                 "status": "success",
                 "data": {
                     "validation": {
@@ -276,7 +276,7 @@ const validateNestedJSON = (req, res, payload) => {
     } else {
          res.status(400).json(
             {
-                "message": "field missions failed validation.",
+                "message": `field ${rule.field} failed validation.`,
                 "status": "error",
                 "data": {
                     "validation": {
